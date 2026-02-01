@@ -1,5 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from datetime import datetime
+import uuid
+
+from app.db import get_connection
+from app.schemas import JobCreate
+
+from workers.tasks import process_job
 
 app = FastAPI(title="MOMENT")
 
@@ -10,6 +17,61 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.get("/")
 def root():
     return {"status": "MOMENT backend alive"}
+
+
+@app.post("/jobs")
+def create_job(job: JobCreate):
+    job_id = str(uuid.uuid4())
+    created_at = datetime.utcnow().isoformat()
+
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        """
+        INSERT INTO jobs (job_id, video_url, content_type, intent, tone, status, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            job_id,
+            job.video_url,
+            job.content_type,
+            job.intent,
+            job.tone,
+            "queued",
+            created_at,
+        ),
+    )
+
+    conn.commit()
+    conn.close()
+
+    process_job.delay(job_id)
+    return {
+
+        "job_id": job_id,
+        "status": "queued"
+    }
+
+
+@app.get("/jobs/{job_id}")
+def get_job(job_id: str):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        "SELECT job_id, status, video_url, content_type, intent, tone FROM jobs WHERE job_id=?",
+        (job_id,),
+    )
+
+    row = cur.fetchone()
+    conn.close()
+
+    if not row:
+        return {"error": "job not found"}
+
+    return dict(row)

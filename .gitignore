@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtualenv
+venv/
+backend/venv/
+
+# SQLite
+*.db
+
+# Jobs / generated media
+jobs/
+backend/jobs/
+
+# OS junk
+.DS_Store
+
+# Env
+.env
+
+# Node
+node_modules/
+
+# Logs
+*.log
