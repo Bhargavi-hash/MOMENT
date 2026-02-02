@@ -8,11 +8,12 @@ import uuid
 
 from app.db import get_connection
 from app.schemas import JobCreate
+from app.routes.jobs import router as jobs_router
 
 from workers.tasks import process_job
 
-
 app = FastAPI(title="MOMENT")
+app.include_router(jobs_router)
 
 app.add_middleware(
     CORSMiddleware,
