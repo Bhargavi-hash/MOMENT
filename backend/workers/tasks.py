@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 load_dotenv()
-from fastapi import logger
+# from fastapi import logger
 
 import json
 from workers.celery_app import celery_app
@@ -12,8 +12,12 @@ from app.transcribe import transcribe_chunks
 from app.storage import get_job_dir
 from pathlib import Path
 
+from app.ffmpeg import generate_clips
+from app.storage import zip_clips
+
 from google.api_core.exceptions import ClientError
 import logging
+logger = logging.getLogger(__name__)
 
 
 @celery_app.task(bind=True)
@@ -67,12 +71,26 @@ def process_job(self, job_id: str):
     print("Number of clips generated:", len(analysis.get("clips", [])))
 
     save_clips(job_id, analysis["clips"])
-    
+
+    # 🎬 actually generate video clips
+    clip_files = generate_clips(
+        video_path=str(video_path),
+        clips=analysis["clips"],
+        job_id=job_id,
+    )
+
+    print("Generated clips:", clip_files)
+
+    # 📦 zip them
+    zip_path = zip_clips(job_id)
+    print("Zip ready at:", zip_path)
+
     # mark completed
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("UPDATE jobs SET status=? WHERE job_id=?", ("completed", job_id))
     conn.commit()
     conn.close()
+
 
     return job_id
