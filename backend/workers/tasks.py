@@ -1,11 +1,22 @@
-from workers.celery_app import celery
+from dotenv import load_dotenv
+load_dotenv()
+from fastapi import logger
+
+import json
+from workers.celery_app import celery_app
 from app.db import get_connection
+from app.analysis import save_clips
+from app.gemini import analyze_transcript
 from app.ingest import download_video, split_video
 from app.transcribe import transcribe_chunks
 from app.storage import get_job_dir
 from pathlib import Path
 
-@celery.task(bind=True)
+from google.api_core.exceptions import ClientError
+import logging
+
+
+@celery_app.task(bind=True)
 def process_job(self, job_id: str):
     conn = get_connection()
     cur = conn.cursor()
@@ -30,6 +41,33 @@ def process_job(self, job_id: str):
     # transcribe all chunks
     transcribe_chunks(chunks, job_dir)
 
+    # load transcript
+    with open(job_dir / "transcript.json") as f:
+        transcript = json.load(f)
+    
+    # fetch job metadata
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT intent,tone FROM jobs WHERE job_id=?",
+        (job_id,)
+    )
+    intent, tone = cur.fetchone()
+    conn.close()
+    
+    platforms = ["tiktok", "instagram", "ytshorts", "twitter"]
+    
+    try:
+        analysis = analyze_transcript(transcript, platforms, intent, tone)
+    except ClientError as e:
+        logger.error(f"Gemini failed: {e}")
+        return
+    # Debug: print analysis result
+    print("Gemini Analysis result:", analysis)
+    print("Number of clips generated:", len(analysis.get("clips", [])))
+
+    save_clips(job_id, analysis["clips"])
+    
     # mark completed
     conn = get_connection()
     cur = conn.cursor()

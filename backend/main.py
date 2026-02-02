@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
@@ -7,6 +10,7 @@ from app.db import get_connection
 from app.schemas import JobCreate
 
 from workers.tasks import process_job
+
 
 app = FastAPI(title="MOMENT")
 
@@ -50,6 +54,7 @@ def create_job(job: JobCreate):
     conn.commit()
     conn.close()
 
+    # Start background processing - Dispatch Celery task
     process_job.delay(job_id)
     return {
 
