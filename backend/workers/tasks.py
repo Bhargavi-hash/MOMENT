@@ -10,6 +10,7 @@ from app.gemini import analyze_transcript
 from app.ingest import download_video, split_video
 from app.transcribe import transcribe_chunks
 from app.storage import get_job_dir
+from app.scoring import score_all
 from pathlib import Path
 
 from app.ffmpeg import generate_clips
@@ -63,6 +64,9 @@ def process_job(self, job_id: str):
     
     try:
         analysis = analyze_transcript(transcript, platforms, intent, tone)
+        preset = intent or "podcast"
+        analysis["clips"] = score_all(analysis["clips"], preset)
+
     except ClientError as e:
         logger.error(f"Gemini failed: {e}")
         return
