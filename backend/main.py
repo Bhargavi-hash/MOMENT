@@ -18,8 +18,8 @@ from app.routes.results import router as results_router
 from workers.tasks import process_job
 
 app = FastAPI(title="MOMENT")
-app.include_router(jobs_router)
 app.include_router(downloads_router, prefix="/downloads")
+app.include_router(jobs_router)
 app.include_router(results_router)
 
 app.add_middleware(

@@ -75,15 +75,15 @@ def process_job(self, job_id: str):
     # Hardcoded viral clips for testing frontend
     clips = []
     for platform in platforms:
-        for i in range(1):  # 2 clips per platform
+        for i in range(2):  # 2 clips per platform
             clips.append({
                 "start": 60 * i,                # 0, 60
                 "end": 60 * (i + 1),            # 60, 120
                 "platform": platform,
-                "caption": f"Sample clip {i+1} for {platform}",
+                "caption": f"Clip {i+1} for {platform}",
                 "hashtags": ["#viral", "#test", f"#{platform}"],
                 "virality": 0.8 + 0.1 * i,      # demo score
-                "clip_filename": f"{platform}_clip_{i+1}.mp4"
+                "clip_filename": f"{platforms}_clip_{i}.mp4"
             })
 
     analysis = {"clips": clips}  # same format as Gemini output

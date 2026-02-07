@@ -12,7 +12,7 @@ export default function ClipCard({
   return (
     <div className="rounded-2xl border p-4 bg-white dark:bg-[#1A1A1A] shadow">
       <video
-        src={`${API_BASE}/downloads/${jobId}/clip/${clip.clip_filename}`}
+        src={`${API_BASE}/clips/${jobId}/${clip.clip_filename}`}
         controls
         className="w-full rounded-xl mb-4"
       />
@@ -35,7 +35,7 @@ export default function ClipCard({
         </div>
 
         <a
-          href={`${API_BASE}/downloads/${jobId}/clip/${clip.clip_filename}`}
+          href={`${API_BASE}/clips/${jobId}/${clip.clip_filename}`}
           download
           className="inline-block mt-3 text-emerald-600 font-medium"
         >

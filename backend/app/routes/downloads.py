@@ -51,6 +51,11 @@ def download_clip(job_id: str, filename: str):
     job_dir = get_job_dir(job_id)
     clip = job_dir / "clips" / filename
 
+    print("JOB DIR:", job_dir)
+    print("FILENAME:", filename)
+    print("FULL PATH:", clip)
+    print("EXISTS:", clip.exists())
+    
     if not clip.exists():
         raise HTTPException(404, "Clip not found")
 
