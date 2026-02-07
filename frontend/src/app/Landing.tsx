@@ -1,5 +1,8 @@
 "use client";
 
+import JobStatusCard from "@/app/components/JobStatusCard";
+import ResultsView from "@/app/components/ResultsView";
+
 import { useState, useEffect } from "react";
 import { createJob } from "@/lib/api";
 import { Moon, Sun, Youtube, Sparkles, Loader2, Camera, ArrowRight } from "lucide-react";
@@ -14,9 +17,16 @@ export default function Landing({
 }: {
   onJobCreated: (jobId: string) => void;
 }) {
+  type Phase = "idle" | "processing" | "done";
+
+  const [phase, setPhase] = useState<Phase>("idle");
+  const [jobId, setJobId] = useState<string | null>(null);
+
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [darkMode, setDarkMode] = useState(false); // Default to light for the new fresh look
+
+  const [showResults, setShowResults] = useState(false);
 
   useEffect(() => {
     if (darkMode) {
@@ -34,9 +44,12 @@ export default function Landing({
     try {
       const job = await createJob(url);
       onJobCreated(job.job_id);
+      setJobId(job.job_id);
+      setPhase("processing");
     } catch (e) {
       console.error(e);
       alert("Backend unreachable or job creation failed");
+      setPhase("idle");
     } finally {
       setLoading(false);
     }
@@ -70,7 +83,7 @@ export default function Landing({
             Own the <span className="text-emerald-500">Moment.</span>
           </h1>
           <p className="text-slate-500 dark:text-slate-400 text-xl max-w-lg mx-auto leading-relaxed">
-            Paste a YouTube link and let our AI handle the editing. Get viral-ready clips in seconds.
+            Paste a YouTube link and let our AI pick your most viral moments. Get platform-ready clips in seconds.
           </p>
         </div>
 
@@ -88,7 +101,7 @@ export default function Landing({
             />
           </div>
 
-          {videoId && (
+          {phase === "idle" && videoId && (
             <div className="overflow-hidden rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="aspect-video w-full bg-black">
                 <iframe
@@ -101,6 +114,21 @@ export default function Landing({
               </div>
             </div>
           )}
+
+          {phase === "processing" && jobId && (
+            <JobStatusCard
+              jobId={jobId}
+              onComplete={() => {
+                setPhase("done");
+                setShowResults(true);
+              }}
+            />
+          )}
+
+          {phase === "done" && jobId && showResults && (
+            <ResultsView jobId={jobId} />
+          )}
+
 
           <button
             onClick={handleSubmit}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Landing from "./components/Landing";
+import Landing from "./Landing";
 // import JobStatus from "./components/JobStatus";
 
 export default function Home() {
