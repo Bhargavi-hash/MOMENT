@@ -1,6 +1,9 @@
 from dotenv import load_dotenv
 load_dotenv()
 
+from fastapi.responses import FileResponse
+from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
@@ -16,7 +19,7 @@ from workers.tasks import process_job
 
 app = FastAPI(title="MOMENT")
 app.include_router(jobs_router)
-app.include_router(downloads_router)
+app.include_router(downloads_router, prefix="/downloads")
 app.include_router(results_router)
 
 app.add_middleware(
@@ -85,3 +88,16 @@ def get_job(job_id: str):
         return {"error": "job not found"}
 
     return dict(row)
+
+@app.get("/clips/{job_id}/{clip_filename}")
+def get_clip(job_id: str, clip_filename: str):
+    clip_path = Path(f"jobs/{job_id}/clips/{clip_filename}")
+
+    if not clip_path.exists():
+        return {"error": "clip not found"}
+
+    return FileResponse(
+        clip_path,
+        media_type="video/mp4",
+        filename=clip_filename,
+    )

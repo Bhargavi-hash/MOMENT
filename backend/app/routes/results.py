@@ -11,7 +11,7 @@ def get_results(job_id: str):
     cur = conn.cursor()
 
     cur.execute("""
-        SELECT start,end,platform,caption,hashtags,virality
+        SELECT start,end,platform,caption,hashtags,virality, clip_filename
         FROM clips
         WHERE job_id=?
         ORDER BY virality DESC
@@ -29,7 +29,8 @@ def get_results(job_id: str):
             "platform": r["platform"],
             "caption": r["caption"],
             "hashtags": json.loads(r["hashtags"]),
-            "virality": r["virality"]
+            "virality": r["virality"],
+            "clip_filename": r["clip_filename"]
         })
 
     return {"clips": clips}

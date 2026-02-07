@@ -1,124 +1,132 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createJob } from "@/lib/api";
+import { Moon, Sun, Youtube, Sparkles, Loader2, Camera, ArrowRight } from "lucide-react";
 
-export default function Landing() {
-  const [videoUrl, setVideoUrl] = useState("");
-  const [file, setFile] = useState<File | null>(null);
-  const [filePreview, setFilePreview] = useState<string | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
+function extractVideoId(url: string) {
+  const match = url.match(/(?:v=|youtu\.be\/|youtube\.com\/embed\/)([^&?]+)/);
+  return match?.[1];
+}
 
-  // create a local preview URL when file is uploaded
+export default function Landing({
+  onJobCreated,
+}: {
+  onJobCreated: (jobId: string) => void;
+}) {
+  const [url, setUrl] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [darkMode, setDarkMode] = useState(false); // Default to light for the new fresh look
+
   useEffect(() => {
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setFilePreview(url);
-      return () => URL.revokeObjectURL(url);
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
     } else {
-      setFilePreview(null);
+      document.documentElement.classList.remove("dark");
     }
-  }, [file]);
+  }, [darkMode]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
-      setVideoUrl(""); // clear YouTube URL if a file is uploaded
-    }
-  };
+  const videoId = extractVideoId(url);
 
-  const handleSubmit = async () => {
-    if (!videoUrl && !file) {
-      alert("Please provide a YouTube URL or upload a video file.");
-      return;
-    }
-
-    setIsProcessing(true);
-
+  async function handleSubmit() {
+    if (!url) return;
+    setLoading(true);
     try {
-      // Here you would normally send videoUrl or file to your backend API
-      // For now, we simulate a delay
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-
-      alert("Video submitted successfully!");
-    } catch (err) {
-      console.error(err);
-      alert("Something went wrong while submitting the video.");
+      const job = await createJob(url);
+      onJobCreated(job.job_id);
+    } catch (e) {
+      console.error(e);
+      alert("Backend unreachable or job creation failed");
     } finally {
-      setIsProcessing(false);
+      setLoading(false);
     }
-  };
-
-  // helper to convert a normal YouTube URL to embed URL
-  const getYouTubeEmbedUrl = (url: string) => {
-    const match = url.match(
-      /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/
-    );
-    return match ? `https://www.youtube.com/embed/${match[1]}` : null;
-  };
+  }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen gap-4 p-4">
-      <h1 className="text-2xl font-bold">MOMENT</h1>
-
-      <div className="flex flex-col gap-2 w-full max-w-md">
-        <input
-          type="text"
-          placeholder="Paste YouTube link"
-          value={videoUrl}
-          onChange={(e) => {
-            setVideoUrl(e.target.value);
-            setFile(null);
-          }}
-          className="border p-2 rounded w-full"
-          disabled={isProcessing}
-        />
-
-        <input
-          type="file"
-          accept="video/*"
-          onChange={handleFileChange}
-          disabled={isProcessing}
-        />
-      </div>
-
-      <button
-        onClick={handleSubmit}
-        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50"
-        disabled={isProcessing}
-      >
-        {isProcessing ? "Processing..." : "Submit"}
-      </button>
-
-      {isProcessing && (
-        <div className="mt-4 flex flex-col items-center">
-          <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-blue-500"></div>
-          <p className="mt-2">Your video is being processed...</p>
+    <div className="min-h-screen transition-colors duration-500 bg-[#FAFAFA] dark:bg-[#121212] text-slate-900 dark:text-slate-100 font-sans">
+      {/* Header / Nav */}
+      <nav className="flex justify-between items-center p-6 max-w-6xl mx-auto">
+        <div className="flex items-center gap-3">
+          <div className="bg-emerald-500 p-2 rounded-xl shadow-lg shadow-emerald-500/20">
+            <Camera className="w-5 h-5 text-white" />
+          </div>
+          <span className="font-bold tracking-tight text-xl">MOMENT</span>
         </div>
-      )}
+        <button
+          onClick={() => setDarkMode(!darkMode)}
+          className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+        >
+          {darkMode ? <Sun className="w-5 h-5 text-yellow-500" /> : <Moon className="w-5 h-5 text-slate-600" />}
+        </button>
+      </nav>
 
-      {filePreview && !isProcessing && (
-        <div className="mt-4">
-          <p className="mb-2">Video Preview:</p>
-          <video
-            src={filePreview}
-            controls
-            className="max-w-full rounded border"
-          />
+      <main className="max-w-2xl mx-auto px-6 py-16 md:py-28">
+        <div className="text-center space-y-6 mb-16">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-sm font-medium border border-emerald-100 dark:border-emerald-500/20">
+            <Sparkles className="w-4 h-4" />
+            <span>AI-Powered Clipping</span>
+          </div>
+          <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-slate-900 dark:text-white">
+            Own the <span className="text-emerald-500">Moment.</span>
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 text-xl max-w-lg mx-auto leading-relaxed">
+            Paste a YouTube link and let our AI handle the editing. Get viral-ready clips in seconds.
+          </p>
         </div>
-      )}
 
-      {videoUrl && getYouTubeEmbedUrl(videoUrl) && !isProcessing && (
-        <div className="mt-4 w-full max-w-md aspect-video">
-          <iframe
-            src={getYouTubeEmbedUrl(videoUrl) || undefined}
-            title="YouTube Preview"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            className="w-full h-full rounded"
-          ></iframe>
+        <div className="space-y-8">
+          <div className="relative group">
+            <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-emerald-500 transition-colors">
+              <Youtube className="w-6 h-6" />
+            </div>
+            <input
+              type="text"
+              placeholder="Paste YouTube link here..."
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              className="w-full pl-14 pr-6 py-5 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1A1A1A] focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all shadow-xl shadow-slate-200/50 dark:shadow-none text-lg"
+            />
+          </div>
+
+          {videoId && (
+            <div className="overflow-hidden rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="aspect-video w-full bg-black">
+                <iframe
+                  className="w-full h-full"
+                  src={`https://www.youtube.com/embed/${videoId}`}
+                  title="YouTube video player"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            </div>
+          )}
+
+          <button
+            onClick={handleSubmit}
+            disabled={loading || !url}
+            className="group w-full py-5 px-8 rounded-3xl font-bold text-white bg-slate-900 dark:bg-emerald-500 hover:bg-slate-800 dark:hover:bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-3 shadow-xl shadow-emerald-500/20"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>Processing Video...</span>
+              </>
+            ) : (
+              <>
+                <span>Create Moments</span>
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </>
+            )}
+          </button>
         </div>
-      )}
+
+        <footer className="mt-32 text-center">
+          <p className="text-slate-400 dark:text-slate-600 text-sm font-medium tracking-widest uppercase">
+            Powered by Moment AI
+          </p>
+        </footer>
+      </main>
     </div>
   );
 }

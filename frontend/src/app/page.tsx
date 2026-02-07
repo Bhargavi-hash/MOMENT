@@ -1,5 +1,17 @@
-import Landing from "./components/Landing";
+"use client";
 
-export default function Page() {
-  return <Landing />;
+import { useState } from "react";
+import Landing from "./components/Landing";
+// import JobStatus from "./components/JobStatus";
+
+export default function Home() {
+  const [jobId, setJobId] = useState<string | null>(null);
+
+  return (
+    <>
+      <Landing onJobCreated={(jobId) => {
+        setJobId(jobId);
+      }} />
+    </>
+  );
 }

@@ -6,11 +6,11 @@ import json
 from workers.celery_app import celery_app
 from app.db import get_connection
 from app.analysis import save_clips
-from app.gemini import analyze_transcript
+# from app.gemini import analyze_transcript
 from app.ingest import download_video, split_video
 from app.transcribe import transcribe_chunks
 from app.storage import get_job_dir
-from app.scoring import score_all
+# from app.scoring import score_all
 from pathlib import Path
 
 from app.ffmpeg import generate_clips
@@ -60,17 +60,34 @@ def process_job(self, job_id: str):
     intent, tone = cur.fetchone()
     conn.close()
     
-    platforms = ["tiktok", "instagram", "ytshorts", "twitter"]
+    platforms = ["tiktok", "instagram"]
     
-    try:
-        analysis = analyze_transcript(transcript, platforms, intent, tone)
-        preset = intent or "podcast"
-        analysis["clips"] = score_all(analysis["clips"], preset)
+    # 🧠 analyze with Gemini -- Commented because of resource exhaustion
+    # try:
+    #     analysis = analyze_transcript(transcript, platforms, intent, tone)
+    #     preset = intent or "podcast"
+    #     analysis["clips"] = score_all(analysis["clips"], preset)
 
-    except ClientError as e:
-        logger.error(f"Gemini failed: {e}")
-        return
+    # except ClientError as e:
+    #     logger.error(f"Gemini failed: {e}")
+    #     return
     # Debug: print analysis result
+    # Hardcoded viral clips for testing frontend
+    clips = []
+    for platform in platforms:
+        for i in range(1):  # 2 clips per platform
+            clips.append({
+                "start": 60 * i,                # 0, 60
+                "end": 60 * (i + 1),            # 60, 120
+                "platform": platform,
+                "caption": f"Sample clip {i+1} for {platform}",
+                "hashtags": ["#viral", "#test", f"#{platform}"],
+                "virality": 0.8 + 0.1 * i,      # demo score
+                "clip_filename": f"{platform}_clip_{i+1}.mp4"
+            })
+
+    analysis = {"clips": clips}  # same format as Gemini output
+
     print("Gemini Analysis result:", analysis)
     print("Number of clips generated:", len(analysis.get("clips", [])))
 

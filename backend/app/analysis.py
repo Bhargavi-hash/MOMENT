@@ -8,8 +8,8 @@ def save_clips(job_id, clips):
 
     for clip in clips:
         cur.execute("""
-            INSERT INTO clips (job_id, start, end, platform, caption, hashtags, virality)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO clips (job_id, start, end, platform, caption, hashtags, virality, clip_filename)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             job_id,
             clip["start"],
@@ -17,7 +17,8 @@ def save_clips(job_id, clips):
             clip["platform"],
             clip["caption"],
             json.dumps(clip["hashtags"]),
-            clip.get("virality", 0.0)
+            clip.get("virality", 0.0),
+            clip.get("clip_filename", "")
         ))
 
     conn.commit()
