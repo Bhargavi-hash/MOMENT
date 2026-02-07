@@ -46,10 +46,10 @@ def download_zip(job_id: str):
     )
 
 
-@router.get("/{job_id}/clip/{index}")
-def download_clip(job_id: str, index: int):
+@router.get("/{job_id}/clip/{filename}")
+def download_clip(job_id: str, filename: str):
     job_dir = get_job_dir(job_id)
-    clip = job_dir / "clips" / f"clip_{index}.mp4"
+    clip = job_dir / "clips" / filename
 
     if not clip.exists():
         raise HTTPException(404, "Clip not found")
@@ -57,5 +57,5 @@ def download_clip(job_id: str, index: int):
     return FileResponse(
         clip,
         media_type="video/mp4",
-        filename=clip.name
+        filename=filename
     )
