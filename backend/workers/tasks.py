@@ -83,7 +83,7 @@ def process_job(self, job_id: str):
                 "caption": f"Clip {i+1} for {platform}",
                 "hashtags": ["#viral", "#test", f"#{platform}"],
                 "virality": 0.8 + 0.1 * i,      # demo score
-                "clip_filename": f"{platforms}_clip_{i}.mp4"
+                "clip_filename": f"{platform}_clip_{i}.mp4"
             })
 
     analysis = {"clips": clips}  # same format as Gemini output

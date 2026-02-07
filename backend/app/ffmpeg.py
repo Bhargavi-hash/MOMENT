@@ -1,4 +1,5 @@
 import subprocess
+from pathlib import Path
 from app.storage import get_clips_dir
 
 
@@ -19,21 +20,26 @@ def extract_clip(video_path: str, start: float, end: float, out_path: str):
     subprocess.run(cmd, check=True)
 
 
-def generate_clips(video_path: str, clips: list, job_id: str):
-    clips_dir = get_clips_dir(job_id)
+def generate_clips(video_path, clips, job_id):
+    clips_dir = Path(f"jobs/{job_id}/clips")
+    clips_dir.mkdir(parents=True, exist_ok=True)
 
-    results = []
+    generated = []
 
-    for idx, clip in enumerate(clips):
-        out = clips_dir / f"clip_{idx}.mp4"
+    for clip in clips:
+        output = clips_dir / clip["clip_filename"]
 
-        extract_clip(
-            video_path,
-            clip["start"],
-            clip["end"],
-            str(out),
-        )
+        cmd = [
+            "ffmpeg",
+            "-y",
+            "-i", video_path,
+            "-ss", str(clip["start"]),
+            "-to", str(clip["end"]),
+            "-c", "copy",
+            str(output),
+        ]
 
-        results.append(str(out))
+        subprocess.run(cmd, check=True)
+        generated.append(output.name)
 
-    return results
+    return generated
