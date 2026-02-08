@@ -16,6 +16,8 @@ from pathlib import Path
 from app.ffmpeg import generate_clips
 from app.storage import zip_clips
 
+from workers.mock import generate_mock_analysis  # For testing without Gemini
+
 from google.api_core.exceptions import ClientError
 import logging
 logger = logging.getLogger(__name__)
@@ -60,7 +62,7 @@ def process_job(self, job_id: str):
     intent, tone = cur.fetchone()
     conn.close()
     
-    platforms = ["tiktok", "instagram"]
+    platforms = ["tiktok", "instagram", "YT shorts", "facebook"]  # could also be an input option
     
     # 🧠 analyze with Gemini -- Commented because of resource exhaustion
     # try:
@@ -71,22 +73,32 @@ def process_job(self, job_id: str):
     # except ClientError as e:
     #     logger.error(f"Gemini failed: {e}")
     #     return
+    
     # Debug: print analysis result
     # Hardcoded viral clips for testing frontend
-    clips = []
-    for platform in platforms:
-        for i in range(2):  # 2 clips per platform
-            clips.append({
-                "start": 60 * i,                # 0, 60
-                "end": 60 * (i + 1),            # 60, 120
-                "platform": platform,
-                "caption": f"Clip {i+1} for {platform}",
-                "hashtags": ["#viral", "#test", f"#{platform}"],
-                "virality": 0.8 + 0.1 * i,      # demo score
-                "clip_filename": f"{platform}_clip_{i}.mp4"
-            })
+    # clips = []
+    # for platform in platforms:
+    #     for i in range(2):  # 2 clips per platform
+    #         clips.append({
+    #             "start": 60 * i,                # 0, 60
+    #             "end": 60 * (i + 1),            # 60, 120
+    #             "platform": platform,
+    #             "caption": f"Clip {i+1} for {platform}",
+    #             "hashtags": ["#viral", "#test", f"#{platform}"],
+    #             "virality": 0.8 + 0.1 * i,      # demo score
+    #             "clip_filename": f"{platform}_clip_{i}.mp4"
+    #         })
 
-    analysis = {"clips": clips}  # same format as Gemini output
+    transcript_text = " ".join([chunk["text"] for chunk in transcript])
+    
+    analysis = generate_mock_analysis(
+        transcript_text=transcript_text, 
+        platforms=platforms, 
+        intent=intent, 
+        tone=tone,
+        video_path=str(video_path) # Critical for duration clamping!
+    )
+    analysis = {"clips": analysis["clips"]}  # same format as Gemini output
 
     print("Gemini Analysis result:", analysis)
     print("Number of clips generated:", len(analysis.get("clips", [])))
