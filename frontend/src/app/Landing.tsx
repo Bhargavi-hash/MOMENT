@@ -116,6 +116,24 @@ export default function Landing({
             </div>
           </div>
 
+          <div className="mt-4 flex flex-col items-center gap-3">
+  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">No link handy? Try these:</p>
+  <div className="flex gap-2">
+    <button 
+      onClick={() => setUrl("https://www.youtube.com/watch?v=dQw4w9WgXcQ")}
+      className="px-4 py-2 rounded-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-sm font-medium hover:border-emerald-500 transition-colors"
+    >
+      📺 Podcast Highlight
+    </button>
+    <button 
+      onClick={() => setUrl("https://www.youtube.com/watch?v=5qap5aO4i9A")}
+      className="px-4 py-2 rounded-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-sm font-medium hover:border-emerald-500 transition-colors"
+    >
+      🎮 Gaming Clip
+    </button>
+  </div>
+</div>
+
 
           {phase === "idle" && videoId && (
             <div className="overflow-hidden rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 animate-in fade-in slide-in-from-bottom-4 duration-500">
