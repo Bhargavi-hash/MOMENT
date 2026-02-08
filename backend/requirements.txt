@@ -12,8 +12,9 @@ redis==7.1.0
 yt-dlp==2026.1.29
 faster-whisper==1.2.1
 ctranslate2==4.6.3
-torch==2.10.0 --index-url https://download.pytorch.org/whl/cpu
 
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.10.0+cpu
 
 numpy==2.2.6
 requests==2.32.5
