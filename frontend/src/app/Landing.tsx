@@ -73,33 +73,49 @@ export default function Landing({
         </button>
       </nav>
 
-      <main className="max-w-2xl mx-auto px-6 py-16 md:py-28">
-        <div className="text-center space-y-6 mb-16">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-sm font-medium border border-emerald-100 dark:border-emerald-500/20">
-            <Sparkles className="w-4 h-4" />
-            <span>AI-Powered Clipping</span>
-          </div>
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-slate-900 dark:text-white">
-            Own the <span className="text-emerald-500">Moment.</span>
-          </h1>
-          <p className="text-slate-500 dark:text-slate-400 text-xl max-w-lg mx-auto leading-relaxed">
-            Paste a YouTube link and let our AI pick your most viral moments. Get platform-ready clips in seconds.
-          </p>
-        </div>
-
-        <div className="space-y-8">
-          <div className="relative group">
-            <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-emerald-500 transition-colors">
-              <Youtube className="w-6 h-6" />
+      <main className="max-w-6xl mx-auto px-6 py-16 md:py-28">
+        <div className="max-w-2xl mx-auto w-full mb-16">
+          <div className="text-center space-y-6 mb-16">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-sm font-medium border border-emerald-100 dark:border-emerald-500/20">
+              <Sparkles className="w-4 h-4" />
+              <span>AI-Powered Clipping</span>
             </div>
-            <input
-              type="text"
-              placeholder="Paste YouTube link here..."
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              className="w-full pl-14 pr-6 py-5 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1A1A1A] focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all shadow-xl shadow-slate-200/50 dark:shadow-none text-lg"
-            />
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-slate-900 dark:text-white">
+              Own the <span className="text-emerald-500">Moment.</span>
+            </h1>
+            <p className="text-slate-500 dark:text-slate-400 text-xl max-w-lg mx-auto leading-relaxed">
+              Paste a YouTube link and let our AI pick your most viral moments. Get platform-ready clips in seconds.
+            </p>
           </div>
+
+          <div className="space-y-8">
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-emerald-500 transition-colors">
+                <Youtube className="w-6 h-6" />
+              </div>
+              <input
+                type="text"
+                placeholder="Paste YouTube link here..."
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+                className="w-full pl-14 pr-16 py-5 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1A1A1A] focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all shadow-xl shadow-slate-200/50 dark:shadow-none text-lg"
+              />
+              {/* Integrated Submit Button */}
+              <button
+                onClick={handleSubmit}
+                disabled={loading || !url}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 rounded-2xl bg-slate-900 dark:bg-emerald-500 text-white disabled:opacity-20 transition-all hover:scale-105 active:scale-95 shadow-md"
+              >
+                {loading ? (
+                  <Loader2 className="w-6 h-6 animate-spin" />
+                ) : (
+                  <ArrowRight className="w-6 h-6" />
+                )}
+              </button>
+            </div>
+          </div>
+
 
           {phase === "idle" && videoId && (
             <div className="overflow-hidden rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -115,6 +131,8 @@ export default function Landing({
             </div>
           )}
 
+
+
           {phase === "processing" && jobId && (
             <JobStatusCard
               jobId={jobId}
@@ -125,29 +143,10 @@ export default function Landing({
             />
           )}
 
-          {phase === "done" && jobId && showResults && (
-            <ResultsView jobId={jobId} />
-          )}
-
-
-          <button
-            onClick={handleSubmit}
-            disabled={loading || !url}
-            className="group w-full py-5 px-8 rounded-3xl font-bold text-white bg-slate-900 dark:bg-emerald-500 hover:bg-slate-800 dark:hover:bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-3 shadow-xl shadow-emerald-500/20"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                <span>Processing Video...</span>
-              </>
-            ) : (
-              <>
-                <span>Create Moments</span>
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </>
-            )}
-          </button>
         </div>
+        {phase === "done" && jobId && showResults && (
+          <ResultsView jobId={jobId} />
+        )}
 
         <footer className="mt-32 text-center">
           <p className="text-slate-400 dark:text-slate-600 text-sm font-medium tracking-widest uppercase">
