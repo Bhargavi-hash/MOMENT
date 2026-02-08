@@ -38,10 +38,14 @@ app.include_router(downloads_router)
 app.include_router(jobs_router)
 app.include_router(results_router)
 
+origins = [
+    "http://localhost:3000",          # Local development
+    "https://api-x2vh.onrender.com",    # VERCEL URL
+]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
