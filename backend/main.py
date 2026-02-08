@@ -8,6 +8,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
 import uuid
+import subprocess
+from contextlib import asynccontextmanager
 
 from app.db import get_connection
 from app.schemas import JobCreate
@@ -17,10 +19,25 @@ from app.routes.results import router as results_router
 
 from workers.tasks import process_job
 
-app = FastAPI(title="MOMENT")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # STARTUP: Launch Celery worker in a separate process
+    # --concurrency=1 is crucial to keep memory low on free tiers
+    worker_proc = subprocess.Popen([
+        "celery", "-A", "workers.celery_app", "worker", 
+        "--loglevel=info", "--concurrency=1"
+    ])
+    
+    yield  # The app runs here
+    
+    # SHUTDOWN: Kill the worker when the app stops
+    worker_proc.terminate()
+
+app = FastAPI(title="MOMENT", lifespan=lifespan)
 app.include_router(downloads_router)
 app.include_router(jobs_router)
 app.include_router(results_router)
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -32,7 +49,7 @@ app.add_middleware(
 
 @app.get("/")
 def root():
-    return {"status": "MOMENT backend alive"}
+    return {"status": "MOMENT backend alive", "worker": "running"}
 
 
 @app.post("/jobs")
