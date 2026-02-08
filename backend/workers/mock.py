@@ -17,11 +17,20 @@ def generate_mock_analysis(transcript_text, platforms, intent=None, tone=None, v
     max_duration = get_video_duration(video_path) if video_path else 60.0
     
     # 2. Adjust hooks based on Tone
-    if tone == "professional":
-        hooks = ["Insightful take on industry trends.", "Key takeaway from today's session.", "Strategic advice for 2026."]
-    else:
-        hooks = ["You NEED to hear this! 🔥", "Absolute game changer. 😱", "This is wild..."]
-
+    hooks = [
+        "This moment lives rent free in my head.",
+        "I wasn't expecting this at all...",
+        "Wait for it... 😳",
+        "Can we talk about how wild this is?",
+        "This is your sign to watch until the end.",
+        "You need to hear this right now.",
+        "Everything changed after this moment.",
+        "I'm still processing this, honestly.",
+        "The energy here is unmatched. 🔥",
+        "POV: You just witnessed greatness.",
+        "Actually speechless.",
+        "The context makes this so much better."
+    ]
     clips = []
     words = transcript_text.split()
 
@@ -46,9 +55,9 @@ def generate_mock_analysis(transcript_text, platforms, intent=None, tone=None, v
                 "start": start_sec,
                 "end": start_sec + duration,
                 "platform": platform,
-                "caption": f"{random.choice(hooks)} | {transcript_snippet}",
+                "caption": f"{random.choice(hooks)}",
                 "hashtags": ["#viral", f"#{intent or 'content'}"],
-                "virality": round(random.uniform(0.8, 0.99), 2),
+                "virality": round(random.uniform(0.7, 0.99), 2),
                 "clip_filename": f"{platform.replace(' ', '_')}_{start_sec}.mp4"
             })
     return {"clips": clips}
