@@ -17,7 +17,7 @@ import {
   Check
 } from "lucide-react";
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000";
 
 export default function ResultsView({ jobId }: { jobId: string }) {
   const [clips, setClips] = useState<any[]>([]);
