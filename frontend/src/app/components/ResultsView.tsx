@@ -12,9 +12,9 @@ import {
   Instagram,
   Youtube as YoutubeIcon,
   Play,
-  Music,
   Twitter,
-  Share2
+  Loader2,
+  Check
 } from "lucide-react";
 
 const API_BASE = "http://localhost:8000";
@@ -22,6 +22,7 @@ const API_BASE = "http://localhost:8000";
 export default function ResultsView({ jobId }: { jobId: string }) {
   const [clips, setClips] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<string>("all");
+  const [downloadState, setDownloadState] = useState<"idle" | "loading" | "success">("idle");
 
   useEffect(() => {
     getClips(jobId).then((res) => {
@@ -29,6 +30,31 @@ export default function ResultsView({ jobId }: { jobId: string }) {
       setClips(data);
     });
   }, [jobId]);
+
+  const handleDownloadBundle = async () => {
+    setDownloadState("loading");
+    try {
+      const response = await fetch(`${API_BASE}/downloads/${jobId}/zip`);
+      if (!response.ok) throw new Error("Download failed");
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `moment_bundle_${jobId}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      setDownloadState("success");
+      setTimeout(() => setDownloadState("idle"), 3000);
+    } catch (error) {
+      console.error(error);
+      setDownloadState("idle");
+      alert("ZIP bundle is still being prepared. Please try again in a few seconds.");
+    }
+  };
 
   const platforms = Array.from(new Set(clips.map((c) => c.platform)));
   const filteredClips = activeTab === "all" 
@@ -38,10 +64,10 @@ export default function ResultsView({ jobId }: { jobId: string }) {
   return (
     <div className="max-w-7xl mx-auto px-6 py-12 space-y-16 animate-in fade-in duration-700">
       
-      {/* Success Banner - Now with Floating Decorative Icons */}
+      {/* Success Banner */}
       <header className="relative overflow-hidden bg-white dark:bg-[#161616] border border-slate-200 dark:border-white/5 rounded-[48px] p-10 md:p-16 shadow-2xl">
         
-        {/* Decorative Background Elements (The "Box" Concept) */}
+        {/* Decorative Background Elements */}
         <div className="absolute top-0 right-0 h-full w-1/3 pointer-events-none hidden lg:block">
           <div className="relative h-full w-full">
              <div className="absolute top-10 right-10 p-4 rounded-3xl bg-emerald-500/10 border border-emerald-500/20 rotate-12 animate-bounce duration-[3000ms]">
@@ -53,16 +79,9 @@ export default function ResultsView({ jobId }: { jobId: string }) {
              <div className="absolute top-1/2 right-72 p-3 rounded-full bg-blue-500/10 border border-blue-500/20 animate-bounce duration-[4000ms]">
                 <Play className="text-blue-500 w-8 h-8 fill-blue-500" />
              </div>
-
              <div className="absolute top-1/5 right-52 p-3 rounded-full bg-yellow-500/10 border border-yellow-500/20 animate-pulse">
                 <Twitter className="text-yellow-500 w-10 h-10 fill-yellow-500" />
              </div>
-             
-             {/* <div className="absolute bottom-20 right-64 p-3 rounded-full bg-yellow-500/10 border border-yellow-500/20 animate-pulse">
-                <Music className="text-yellow-500 w-8 h-8 fill-yellow-500" />
-             </div> */}
-
-             
           </div>
         </div>
 
@@ -83,17 +102,40 @@ export default function ResultsView({ jobId }: { jobId: string }) {
             </div>
 
             <div className="pt-4">
-              <a
-                href={`${API_BASE}/downloads/${jobId}/zip`}
-                className="inline-flex items-center gap-3 px-10 py-5 rounded-2xl bg-slate-900 dark:bg-emerald-500 text-white font-bold text-lg hover:shadow-2xl hover:shadow-emerald-500/30 transition-all active:scale-95 shadow-lg"
+              <button
+                onClick={handleDownloadBundle}
+                disabled={downloadState === "loading"}
+                className={`inline-flex items-center gap-3 px-10 py-5 rounded-2xl font-bold text-lg transition-all active:scale-95 shadow-lg ${
+                  downloadState === "success" 
+                    ? "bg-emerald-600 text-white shadow-emerald-500/40" 
+                    : "bg-slate-900 dark:bg-emerald-500 text-white hover:shadow-2xl hover:shadow-emerald-500/30"
+                }`}
               >
-                <Archive size={22} />
-                Download ZIP Bundle
-              </a>
+                {downloadState === "idle" && (
+                  <>
+                    <Archive size={22} />
+                    Download ZIP Bundle
+                  </>
+                )}
+                
+                {downloadState === "loading" && (
+                  <>
+                    <Loader2 size={22} className="animate-spin" />
+                    Generating...
+                  </>
+                )}
+
+                {downloadState === "success" && (
+                  <>
+                    <Check size={22} />
+                    Ready! Check Downloads
+                  </>
+                )}
+              </button>
             </div>
           </div>
 
-          {/* Right Side Stats - Fills the space for Desktop */}
+          {/* Right Side Stats */}
           <div className="hidden xl:flex flex-col items-center justify-center p-8 bg-slate-50 dark:bg-white/5 rounded-[40px] border border-slate-200 dark:border-white/5 min-w-[200px]">
              <span className="text-6xl font-black text-slate-900 dark:text-white">{clips.length}</span>
              <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">Total Clips</span>
@@ -156,5 +198,7 @@ export default function ResultsView({ jobId }: { jobId: string }) {
         </div>
       )}
     </div>
+
+    
   );
 }
