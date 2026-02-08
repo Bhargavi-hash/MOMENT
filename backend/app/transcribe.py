@@ -4,19 +4,19 @@ from pathlib import Path
 import json
 
 # tiny model is fastest
-model = WhisperModel("tiny", device="cpu", compute_type="int8")
 
-def transcribe_chunk(video_path: Path):
-    segments, _ = model.transcribe(str(video_path), language="en")
-    results = []
-    for s in segments:
-        results.append(
-            {"start": s.start, "end": s.end, "text": s.text.strip()}
-        )
-    return results
+# def transcribe_chunk(video_path: Path):
+#     segments, _ = model.transcribe(str(video_path), language="en")
+#     results = []
+#     for s in segments:
+#         results.append(
+#             {"start": s.start, "end": s.end, "text": s.text.strip()}
+#         )
+#     return results
 
 def _worker(chunk_path):
-    model = WhisperModel("tiny", compute_type="int8")
+    model = WhisperModel("tiny", device="cpu", compute_type="int8")
+    
     segments, _ = model.transcribe(str(chunk_path), language="en")
 
     out = []
@@ -26,6 +26,11 @@ def _worker(chunk_path):
             "end": s.end,
             "text": s.text.strip()
         })
+    
+    del model  # Free up memory immediately after transcription
+    import gc
+    gc.collect()  # Force garbage collection to free memory
+    
     return out
 
 
