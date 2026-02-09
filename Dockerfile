@@ -20,9 +20,9 @@ RUN printf '#!/bin/sh\n\
 echo "nameserver 8.8.8.8" > /etc/resolv.conf\n\
 echo "nameserver 8.8.4.4" >> /etc/resolv.conf\n\
 echo "DNS successfully set to Google DNS"\n\
-# Start the background worker and the web server\n\
+# Launch processes\n\
 PYTHONPATH=/app/backend:/app celery -A backend.workers.tasks worker --loglevel=info & \n\
-PYTHONPATH=/app/backend:/app uvicorn backend.main:app --host 0.0.0.0 --port 7860\n' > /entrypoint.sh && \
+PYTHONPATH=/app/backend:/app uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8000}\n' > /entrypoint.sh && \
 chmod +x /entrypoint.sh
 
 # Set environment variables
