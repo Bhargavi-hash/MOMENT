@@ -39,6 +39,7 @@ export default function Landing({
   const videoId = extractVideoId(url);
 
   async function handleSubmit() {
+    alert("Attempting to connect to: " + process.env.NEXT_PUBLIC_API_URL);
     if (!url) return;
     setLoading(true);
     try {
