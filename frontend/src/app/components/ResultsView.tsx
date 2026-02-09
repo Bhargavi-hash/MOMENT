@@ -17,8 +17,7 @@ import {
   Check
 } from "lucide-react";
 
-const API_BASE = "https://moment-production-e69d.up.railway.app" || "http://localhost:8000";
-
+const API_BASE = "https://moment-production-e69d.up.railway.app";
 export default function ResultsView({ jobId }: { jobId: string }) {
   const [clips, setClips] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<string>("all");
