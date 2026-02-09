@@ -3,7 +3,7 @@
 import { Download, Share2, Flame, Copy, Check } from "lucide-react";
 import { useState } from "react";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000";
+const API_BASE = "https://moment-production-e69d.up.railway.app" || "http://localhost:8000";
 export default function ClipCard({
   clip,
   jobId,
