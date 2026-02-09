@@ -1,19 +1,14 @@
 import os
 from celery import Celery
 
-# Check if we are on Railway (which uses /data) or Local
-if os.path.exists("/data"):
-    # PRODUCTION (Railway)
-    DB_PATH = "/data/moment_vault.sqlite"
-else:
-    # LOCAL (Your computer)
-    DB_PATH = "moment_vault.sqlite"
+# Railway provides REDIS_URL automatically once you link the service.
+# We fallback to a local redis if the variable isn't found.
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
 celery_app = Celery(
     "moment",
-    # We change these from Redis to SQLAlchemy + SQLite
-    broker=f"sqla+sqlite:///{DB_PATH}",
-    backend=f"db+sqlite:///{DB_PATH}",
+    broker=REDIS_URL,
+    backend=REDIS_URL,
     include=["workers.tasks"], 
 )
 
@@ -23,6 +18,6 @@ celery_app.conf.update(
     result_serializer="json",
     timezone="UTC",
     enable_utc=True,
-    # Crucial for SQLite to prevent "Database is locked" errors
+    # Still keep concurrency low to save memory on free tier
     worker_concurrency=1 
 )
