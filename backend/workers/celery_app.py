@@ -1,9 +1,15 @@
 import os
 from celery import Celery
 
-# Railway provides REDIS_URL automatically once you link the service.
-# We fallback to a local redis if the variable isn't found.
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+# Get the URL from the environment
+REDIS_URL = os.getenv("REDIS_URL")
+
+# --- DEBUG LOG ---
+if REDIS_URL:
+    print(f"SUCCESS: Found Redis URL starting with: {REDIS_URL[:15]}...")
+else:
+    print("ERROR: REDIS_URL environment variable is missing!")
+# -----------------
 
 celery_app = Celery(
     "moment",
