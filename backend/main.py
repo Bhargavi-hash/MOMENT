@@ -40,12 +40,14 @@ app.include_router(results_router)
 
 origins = [
     "http://localhost:3000",          # Local development
-    "https://api-x2vh.onrender.com",    # VERCEL URL
+    "https://moment-sand.vercel.app/",    # VERCEL URL
+    "https://moment-production-e69d.up.railway.app",
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
