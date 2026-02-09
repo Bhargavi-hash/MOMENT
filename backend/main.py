@@ -97,6 +97,7 @@ def create_job(job: JobCreate):
 @app.get("/jobs/{job_id}")
 def get_job(job_id: str):
     conn = get_connection()
+    # No need to call cursor() manually if you want to use the row_factory properly
     cur = conn.cursor()
 
     cur.execute(
@@ -110,7 +111,8 @@ def get_job(job_id: str):
     if not row:
         return {"error": "job not found"}
 
-    return dict(row)
+    # Safer way to return a dictionary from a sqlite3.Row object
+    return {key: row[key] for key in row.keys()}
 
 @app.get("/clips/{job_id}/{clip_filename}")
 def get_clip(job_id: str, clip_filename: str):
