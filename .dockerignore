@@ -2,3 +2,11 @@ frontend/
 node_modules/
 .next/
 .git/
+.github
+__pycache__
+.venv
+venv
+env
+*.pyc
+*.pyo
+.DS_Store
