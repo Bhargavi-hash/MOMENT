@@ -22,7 +22,7 @@ We prioritized a scalable, industrial-strength stack:
 4. **Broker:** **Redis** acts as the heartbeat of our system, managing communication between the API and the workers.
 5. **AI Core:** **Faster-Whisper** for transcription and **FFmpeg** for server-side media manipulation.
 
-![Architecture Diagram](Gemini_Generated_Image_d5fywjd5fywjd5fy.png)
+![Architecture Diagram](Screenshot%20from%202026-02-10%2011-52-40.png)
 
 ##🚧 Challenges We Ran Into
 ### 1. The Cloud Memory "Glass Ceiling"
