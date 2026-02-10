@@ -24,7 +24,7 @@ We prioritized a scalable, industrial-strength stack:
 
 ![Architecture Diagram](Screenshot%20from%202026-02-10%2011-52-40.png)
 
-##🚧 Challenges We Ran Into
+## 🚧 Challenges We Ran Into
 ### 1. The Cloud Memory "Glass Ceiling"
 
 Our biggest hurdle was the resource-intensive nature of AI video processing. We deployed our backend on Railway, which has a strict memory limit. Initially, our Celery workers would trigger a SIGKILL (Out of Memory error) the moment they tried to load the Whisper model while simultaneously holding video chunks in memory.
